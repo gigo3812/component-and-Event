@@ -1,0 +1,101 @@
+این کامپوننت برای نمایش و عدم نمایش منوی اصلی در هنگام اسکرول کردن می باشد
+Show And Hide Menu When Scroll
+
+*********************************************in main(php or html) File*******************
+1=> "add @wheel or @scroll in main tag"
+
+	<div id="jupiter" v-cloak v-scroll="callTypeMenu" >
+
+
+2=> type tag in header tag 
+	important==>(valu of type is : fixed or top-fixed or bottom-fixed or none)
+
+<menu-position type="top-fixed"> ... </menu-position>
+
+*********************************************in js File*********************************
+
+1 => "create vue component with name menu-position"
+
+import Vue from "vue";
+Vue.component("menu-position", {
+    created() {
+        this.$root.c = this;
+    },
+    props: ["type"],
+    template: `<div 
+                    :style="cls_menu" 
+                     style="position: fixed;opacity: 1;transition: opacity 1s , visibility 1s;"
+                     @wheel="typeMenu()">
+                <slot></slot>
+             </div>`,
+    data() {
+        return {
+            cls_menu: "visibility: visible;",
+            scroll_y: 0
+        };
+    },
+    methods: {
+        typeMenu() {
+            if (window.scrollY == 0) {
+                this.cls_menu = "visibility: visible; ";
+            } else {
+                switch (this.type) {
+                    case "fixed":
+                        this.cls_menu = "visibility: visible;";
+                        break;
+                    case "top-fixed":
+                        console.log("s-top-fixed");
+                        if (window.scrollY <= this.scroll_y)
+                            this.cls_menu = "visibility: visible; ";
+                        else this.cls_menu = "opacity:0; visibility: hidden;";
+                        break;
+                    case "bottom-fixed":
+                        console.log("s-bottom-fixed");
+                        if (window.scrollY >= this.scroll_y)
+                            this.cls_menu = "visibility: visible;  ";
+                        else this.cls_menu = " opacity:0; visibility: hidden;";
+
+                        break;
+                    default:
+                        this.cls_menu = "position : relative;";
+                        break;
+                }
+            }
+            this.scroll_y = window.scrollY;
+        }
+    }
+});
+
+
+
+2 => "create Directive @scroll or @wheel in main Vue"
+ directives: {
+        scroll: {
+            inserted: function(el, binding) {
+                let f = function(evt) {
+                    if (binding.value(evt, el)) {
+                        window.removeEventListener("scroll", f);
+                    }
+                };
+                window.addEventListener("scroll", f);
+            }
+        },
+        wheel: {
+            inserted: function(el, binding) {
+                let f = function(evt) {
+                    wheelDelta = evt.wheelDelta;
+                    if (binding.value(evt, el)) {
+                        window.removeEventListener("wheel", f);
+                    }
+                };
+                window.addEventListener("wheel", f);
+            }
+        }
+    },
+	
+
+3=> "create function in main vue for call typeMenu function from component "
+
+callTypeMenu() {
+            this.$root.c.typeMenu();
+        },
